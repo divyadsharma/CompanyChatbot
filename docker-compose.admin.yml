@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  kibana:
+    # First Apple M1 compatible version is 7.13.1
+    image: kibana:6.8.16
+    container_name: company_chat_kibana6
+    ports:
+      - 5602:5601
+    environment:
+      ELASTICSEARCH_URL: http://web.elasticsearch:9200
+      ELASTICSEARCH_HOSTS: '["http://web.elasticsearch:9200"]'
+    depends_on:
+      - elasticsearch
+    networks:
+      company-chatbot:
+        aliases:
+          - es.kibana
