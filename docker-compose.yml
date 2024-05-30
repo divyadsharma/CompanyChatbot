@@ -1,6 +1,61 @@
 version: '3.8'
 
 services:
+  db:
+    image: postgres:latest
+    volumes:
+      - ./tmp/db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      
+  app:
+    build: .
+    command: bundle exec rails s -p 3000 -b '0.0.0.0'
+    volumes:
+      - .:/rails
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+      - elasticsearch
+    environment:
+      RAILS_ENV: development
+      DATABASE_URL: postgres://postgres:password@db:5432/db_name
+
+  puma:
+    build: .
+    command: bundle exec puma -p 3000 -b '0.0.0.0'
+    # <<: *app
+    container_name: chatbot-puma
+    volumes:
+      - .:/rails
+    ports:
+      - 3000:3000
+    depends_on:
+      - db
+    environment:
+      RAILS_ENV: development
+      DATABASE_URL: postgres://postgres:password@db:5432/db_name
+    networks:
+      company-chatbot:
+        aliases:
+          - chatbot.puma
+  # puma:
+  #   build: .
+  #   command: bundle exec puma -p 3000 -b '0.0.0.0'
+  #   volumes:
+  #     - .:/app
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - db
+  #   environment:
+  #     RAILS_ENV: development
+  #     DATABASE_URL: postgres://postgres:password@db:5432/db_name
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
     container_name: elasticsearch6
@@ -22,7 +77,8 @@ services:
           - es-local
           - es.search
 
-volumes:
+volumes: 
+  db:
   elasticsearch:
     driver: local
 

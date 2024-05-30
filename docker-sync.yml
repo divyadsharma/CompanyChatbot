@@ -1,0 +1,6 @@
+version: '2'
+
+syncs:
+  rails_sync:
+    src: '.'
+    sync_excludes: ['.circleci', '.git', '.github', 'tmp', 'log', '.docker-sync', 'vendor']
